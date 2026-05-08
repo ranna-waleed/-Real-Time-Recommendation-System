@@ -32,6 +32,8 @@ df = df.select(
 # drop null values
 df = df.dropna()
 
+df = df.sample(fraction=0.08, seed=42)
+
 # filter invalid ratings
 df = df.filter((col("rating") >= 0.5) & (col("rating") <= 5.0))
 
