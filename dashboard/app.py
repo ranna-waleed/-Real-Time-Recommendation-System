@@ -20,19 +20,24 @@ alerts_log_path = "/home/hduser/alerts_log/alerts.json"
 def read_json_files(path):
     all_data = []
     if not os.path.exists(path):
-        return pd.DataFrame()
-    for file in os.listdir(path):
-        if file.endswith(".json"):
+            return pd.DataFrame()
+    files = [f for f in os.listdir(path) if f.endswith(".json")]
+    if not files:
+            return pd.DataFrame()
+    files = sorted(files)[-10:]
+    for file in files:
             file_path = os.path.join(path, file)
             try:
                 df = pd.read_json(file_path, lines=True)
+                if "window" in df.columns:
+                   df = df.drop(columns=["window"])
                 all_data.append(df)
             except Exception:
                 continue
     if len(all_data) == 0:
         return pd.DataFrame()
     return pd.concat(all_data, ignore_index=True)
-
+    return result
 def read_alerts():
     alerts = []
     if not os.path.exists(alerts_log_path):

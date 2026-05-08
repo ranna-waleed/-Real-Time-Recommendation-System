@@ -103,7 +103,7 @@ user_activity_query = user_activity.writeStream \
 
 # write trending results to json for dashboard
 json_query = trending_stream.writeStream \
-    .outputMode("update") \
+    .outputMode("append") \
     .format("json") \
     .option("path", "/home/hduser/streaming_output/trending") \
     .option("checkpointLocation", "/home/hduser/streaming_output/checkpoint_trending") \
@@ -112,7 +112,7 @@ json_query = trending_stream.writeStream \
 
 # write user activity to json for dashboard
 user_json_query = user_activity.writeStream \
-    .outputMode("update") \
+    .outputMode("append") \
     .format("json") \
     .option("path", "/home/hduser/streaming_output/user_activity") \
     .option("checkpointLocation", "/home/hduser/streaming_output/checkpoint_user") \
