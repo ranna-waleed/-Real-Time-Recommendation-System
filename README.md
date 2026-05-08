@@ -20,7 +20,7 @@ This system learns user preferences from historical movie ratings using the ALS 
 - Live dashboard with 5 panels that auto-refreshes every 3 seconds
 
 ## Project Structure
-
+```
 realtime-recommendation-system/
 ├── ml/
 │   └── als_training.py           # Batch ALS model training
@@ -38,7 +38,7 @@ realtime-recommendation-system/
 │   └── architecture_diagram.png  # System architecture
 ├── README.md
 └── requirements.txt
-
+```
 ## Requirements
 
 - Ubuntu 22.04
