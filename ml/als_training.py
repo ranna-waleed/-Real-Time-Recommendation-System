@@ -54,7 +54,7 @@ als = ALS(
     ratingCol="rating",
     rank=10,
     maxIter=10,
-    regParam=0.1,
+    regParam=0.1, # prevent overfit
     coldStartStrategy="drop",
     nonnegative=True
 )
