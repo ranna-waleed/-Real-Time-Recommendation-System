@@ -29,11 +29,12 @@ raw_stream = spark.readStream \
     .load()
 
 # parse the json messages from kafka
+#kafka store bytes -> json string ->structure col 
 parsed_stream = raw_stream.selectExpr("CAST(value AS STRING) as json_str") \
     .select(from_json(col("json_str"), schema).alias("data")) \
-    .select("data.*")
+    .select("data.*") # flatten data
 
-# handle malformed records by dropping nulls
+# remove invalid records by dropping nulls
 clean_stream = parsed_stream.dropna()
 
 # add event time column for windowing
@@ -42,10 +43,10 @@ clean_stream = clean_stream.withColumn(
     current_timestamp()
 )
 
-# apply watermark to handle late data
+# Ignore data that arrives too late ,after 10 sec
 watermarked_stream = clean_stream.withWatermark("event_time", "10 seconds")
 
-# window analytics - 30 second window with 10 second slide
+# window analytics, 30 second window with 10 second slide
 window_analytics = watermarked_stream \
     .groupBy(
         window(col("event_time"), "30 seconds", "10 seconds"),
@@ -53,10 +54,11 @@ window_analytics = watermarked_stream \
     ) \
     .agg(
         avg("rating").alias("avg_rating"),
-        count("user_id").alias("interaction_count")
+        count("user_id").alias("interaction_count") #how popular movie is
     )
 
 # calculate custom trending score
+#combine popularity + rating
 # trending score = interaction count * avg rating / time decay
 trending_stream = window_analytics.withColumn(
     "trending_score",
@@ -74,7 +76,7 @@ user_activity = watermarked_stream \
         avg("rating").alias("avg_rating")
     )
 
-# alert system - detect trending items with avg rating above 4.5
+# alert system , detect trending items with avg rating above 4.5
 alert_stream = trending_stream.filter(col("avg_rating") > 4.5)
 
 # write trending results to console
