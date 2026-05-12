@@ -52,13 +52,14 @@ watermarked_stream = clean_stream.withWatermark("event_time", "10 seconds")
 
 # function to generate recommendations for each micro batch
 def generate_recommendations(batch_df, batch_id):
+    #skip empty batch
     if batch_df.count() == 0:
         return
 
     print("Processing batch id: " + str(batch_id))
-    start_time = time.time()
+    start_time = time.time() $ measure latency
 
-    # get unique users in this batch
+    # get all users who had activity in this batch
     users_in_batch = batch_df.select(
         col("user_id").alias("userId")
     ).distinct()
@@ -95,7 +96,7 @@ def generate_recommendations(batch_df, batch_id):
     print("Top trending items in this batch:")
     trending.show(truncate=False)
 
-    # detect rating manipulation - users rating same item multiple times
+    # detect rating manipulation , users rating same item multiple times
     duplicate_ratings = batch_df.groupBy("user_id", "item_id") \
         .agg(count("rating").alias("rating_count")) \
         .filter(col("rating_count") > 1)
