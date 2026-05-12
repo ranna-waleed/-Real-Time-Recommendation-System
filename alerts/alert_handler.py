@@ -60,11 +60,13 @@ def write_alert(alert_type, message):
         "message": message
     }
     log_file = alerts_log_path + "/alerts.json"
+    #append alert to file (JSON lines format)
     with open(log_file, "a") as f:
         f.write(json.dumps(alert) + "\n")
     print("ALERT [" + alert_type + "]: " + message)
 
 def process_alerts(batch_df, batch_id):
+    #skip empty batch
     if batch_df.count() == 0:
         return
 
@@ -74,7 +76,7 @@ def process_alerts(batch_df, batch_id):
     item_stats = batch_df.groupBy("item_id") \
         .agg(
             avg("rating").alias("avg_rating"),
-            count("user_id").alias("interaction_count")
+            count("user_id").alias("interaction_count")#no. of interactions
         )
 
     # alert for items with rating above threshold
@@ -103,7 +105,7 @@ def process_alerts(batch_df, batch_id):
                   str(row["activity_count"]) + " interactions"
         write_alert("USER_SPIKE", message)
 
-    # check for rating manipulation
+    # check for rating manipulation:same user rating same movie multiple times
     manipulation = batch_df.groupBy("user_id", "item_id") \
         .agg(count("rating").alias("rating_count")) \
         .filter(col("rating_count") > 1) \
